@@ -1,0 +1,168 @@
+#!/bin/bash
+#
+# Examlple of using options in scripts
+#
+
+if [ $# -eq 0 ]
+then
+        echo "Missing options!"
+        echo "(run $0 -h for help)"
+        echo ""
+        exit 0
+fi
+
+# Variable containing the entit(ies)y having their permissions altereted
+SUBJECT=" "
+# Variable indicating the type of subject
+TYPE=" "
+# Variable containing path of the path or directory being modified
+LOCATION="./"
+# Variable containing the new permission level
+PERMISSION=" "
+# Recursion
+RECURSION="NO"
+
+
+while getopts "eh:g:uo:f:p:r" OPTION; do
+        case $OPTION in
+
+	     	e)
+
+                        echo "Modify permission by combining 3 options. One to select the user or group to be modified. (-g, gid, u, uid)"
+			echo "then  -f followed by the path of the file or directory you want to modify"
+			echo "Finally -p with one of the avaialable options to set the new action level (use manper -h for a full list of options)"
+			echo "---"
+			echo "Examples"
+			echo "---"
+			echo "Set the owner of the current directory as user jSmith"
+			echo "manper -u jSmith -f . "
+			echo "---" 
+			echo "Give all users except the owner and members of the owner group read only access to file testfile located in the current directory"
+			echo "manper -o -"
+			;;
+
+		h)
+
+                        echo "   -e       show examples of how to use this script"
+			echo "   -h       open the help menu (this command)"
+			echo "   -o	  change access permissions for all users except the owner and group members"
+			echo "	 -g    	  specify group to be modified"
+			echo "   -u	  specify the user to be made owner of the file or directory"
+			echo "	 -f       specify directory or file to be modified this can be neglected if modifying the current directory"
+			echo "   -p       set new acces level (none (---), read(r--), execute(--x), write(-w-), read/write(rw-), read/execute(r-x), read/execute/write(rwx) "
+			echo "   -r 	  optional fourth option to make permission changes on a directory recursive (should be used in most cases)"
+			exit 0
+                        ;;
+#	
+
+		g)
+
+			if [ $TYPE=" " ]
+			then	
+				TYPE="g"
+				SUBJECT=$2
+			
+			else
+
+				echo " invalid options or values, please look over your input"
+				exit 0
+			fi	
+			;;
+
+
+         	u)
+
+			if [ $TYPE=" " ]
+                        then
+                                TYPE="u"
+                                SUBJECT=$2
+
+                        else
+
+                                echo "invalid options or values, please look over your input"
+                                exit 0
+                        fi
+                        ;;
+
+                o)
+
+                        if [ $TYPE=" " ]
+                        then
+                                TYPE="o"
+           			SUBJECT=$2
+
+                        else
+
+                                echo " invalid options or values, please look over your input"
+                                exit 0
+                        fi
+                        ;;
+
+		f)
+
+			if [ $LOCATION=" " ]
+                        then
+                        	if [ $TYPE="o" ]
+				then
+                                	LOCATION=$3
+				else
+					LOCATION=$4
+				fi
+	
+                        else
+
+                                echo "invalid options or values, please look over your input"
+                                exit 0
+                        fi
+                        ;;
+	
+
+		p)	
+			
+			if [ $PERMISSION=" " ]
+                        then
+				if [ $TYPE="o" ]
+                                then
+                                        Permisson=$5
+                                else
+                                        LOCATION=$6
+                                fi
+
+                        else
+
+                                echo " invalid options or values, please look over your input"
+                                exit 0
+                        fi
+                        ;;
+		
+
+		r)
+
+			RECURSION="YES"
+			;;
+			
+        esac
+done
+
+# TODO validate input
+
+if [ $RECURSION = "ES" ]; then
+	if [ $TYPE = "u" ]; then	
+		chown -R $SUBJECT $LOCATION
+	elif [ $TYPE = "g" ]; then
+                chown -R ":"$SUBJECT $LOCATION
+	else
+		chmod -R $TYPE"="$PERMISSION $LOCATION
+	fi
+else
+        if [ $TYPE = "u" ]; then
+                chown $SUBJECT $LOCATION
+
+	elif [ $TYPE = "g" ]; then
+                chown ":"$SUBJECT $LOCATION
+	else
+                chmod $TYPE"="$PERMISSION $LOCATION
+        fi
+		
+fi
+
